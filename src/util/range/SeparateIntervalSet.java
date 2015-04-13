@@ -165,7 +165,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 		
 		@Override
-		public void remove() { // TODO
+		public void remove() {
 			if (path.isEmpty()) {
 				throw new IllegalStateException();
 			}
@@ -173,7 +173,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			if (removing == null) {
 				path.push(null);
 				throw new IllegalStateException();
-			} else {// TODO
+			} else {
 				TreeNode subroot = path.peek();
 				if (subroot.left == removing) {
 					if (removing.right == null) {
@@ -190,14 +190,12 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 						path.push(null);
 					}
 				} else {
-					path.push(removing.left);
-					calc = true;
-					TreeNode node = removing.left;
-					while (node.right != null) {
-						node = node.right;
+					if (removing.left == null) {
+						subroot.right = removing.right;
+						path.push(null);
+					} else {// TODO
+						
 					}
-					node.right = removing.right;
-					subroot.right = removing.left;
 				}
 			}
 		}
