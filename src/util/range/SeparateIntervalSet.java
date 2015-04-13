@@ -103,7 +103,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 	}
 	
-	private class TreeIterator implements Iterator<Interval<E>> {
+	private class TreeIterator implements Iterator<Interval<E>> { // TODO test correctness
 		/**
 		 * path is a list of TreeNodes. It goes from the root to the last node
 		 * that was returned. TreeNodes that are left-parents in the path are
@@ -186,15 +186,36 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 							subroot = subroot.right;
 						}
 						subroot.right = removing.right;
-						path.push(subroot.right);
+						subroot = subroot.right;
+						path.push(subroot);
+						while (subroot.left != null) {
+							subroot = subroot.left;
+							path.push(subroot);
+						}
 						path.push(null);
 					}
 				} else {
 					if (removing.left == null) {
 						subroot.right = removing.right;
+						if (subroot.right != null) {
+							path.push(subroot.right);
+						}
 						path.push(null);
-					} else {// TODO
-						
+					} else {
+						subroot.right = removing.left;
+						if (removing.right != null) {
+							while (subroot.right != null) {
+								subroot = subroot.right;
+							}
+							subroot.right = removing.right;
+							subroot = subroot.right;
+							path.push(subroot);
+							while (subroot.left != null) {
+								subroot = subroot.left;
+								path.push(subroot);
+							}
+						}
+						path.push(null);
 					}
 				}
 			}
