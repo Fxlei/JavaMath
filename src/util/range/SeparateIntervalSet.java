@@ -25,7 +25,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	
 	@Override
 	public Set<E> toSet() {
-		Set set = new HashSet();
+		Set<E> set = new HashSet<E>();
 		if (root != null) {
 			root.addToSet(set);
 		}
@@ -104,6 +104,12 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	}
 	
 	private class TreeIterator implements Iterator<Interval<E>> {
+		/**
+		 * path is a list of TreeNodes. It goes from the root to the last node
+		 * that was returned. TreeNodes that are left-parents in the path are
+		 * skipped. null can be appended, if it has already been calculated and
+		 * removing is forbidden.
+		 */
 		private Stack<TreeNode> path;
 		
 		public TreeIterator() {
@@ -142,7 +148,8 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 					return path.peek().middle;
 				} else {
 					if (node.right == null) {
-						
+						path.pop();
+						return path.peek().middle;
 					} else {
 						node = node.right;
 						path.pop();
@@ -153,7 +160,6 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 						}
 						return node.middle;
 					}
-					return path.peek().middle;
 				}
 			}
 		}
