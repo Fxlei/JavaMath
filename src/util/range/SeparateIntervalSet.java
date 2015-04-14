@@ -227,6 +227,98 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 	}
 	
+	@Override
+	public SeparateIntervalSet<E> toSeparateIntervalSet() {
+		return this;
+	}
+	
+	@Override
+	public String toString() {
+		if (root == null) {
+			return "O";
+		} else {
+			Iterator<Interval<E>> it = iterateIntervals();
+			StringBuilder sb = new StringBuilder(it.next().toString());
+			while (it.hasNext()) {
+				sb.append("U").append(it.next().toString());
+			}
+			return sb.toString();
+		}
+	}
+	
+	@Override
+	public void add(E e) {
+		TreeNode node = root;
+		while (node != null) {
+			if (node.middle.connected(e)) {
+				// TODO
+				
+				if (node.middle.compare(node.middle.infimum(), e) == 0) {
+					if (!node.middle.isInfimumIncluded()) {
+						node.middle = new Interval<E>(node.middle.comparator(), e, node.middle.supremum(),
+								node.middle.config | Interval.INFIMUM_EX_INCLUDED);
+						
+						TreeNode nl = node.left;
+						if (nl != null) {
+							if (nl.right == null) {
+								if (nl.middle.connected(e)) {
+									node.right = nl.left;
+								}
+							} else {
+								while (nl.right.right != null) {
+									nl = nl.left;
+								}
+								if (nl.right.middle.connected(e)) {
+									node.middle = Interval.connectedUnion(node.middle, nl.right.middle);
+									nl.right = nl.right.left;
+								}
+							}
+						}
+					}
+				} else if (node.middle.compare(node.middle.supremum(), e) == 0) {
+					if (!node.middle.isSupremumIncluded()) {
+						node.middle = new Interval<E>(node.middle.comparator(), node.middle.infimum(), e,
+								node.middle.config | Interval.SUPREMUM_EX_INCLUDED);
+						
+						TreeNode nr = node.right;
+						if (nr != null) {
+							if (nr.left == null) {
+								if (nr.middle.connected(e)) {
+									node.right = nr.right;
+								}
+							} else {
+								while (nr.left.left != null) {
+									nr = nr.left;
+								}
+								if (nr.left.middle.connected(e)) {
+									node.middle = Interval.connectedUnion(node.middle, nr.left.middle);
+									nr.left = nr.left.right;
+								}
+							}
+						}
+					}
+				}
+				
+			} else if (node.middle.isLowerBound(e)) {
+				if (node.left == null) {
+					node.left = new TreeNode(null, new Interval<E>(root.middle.comparator(), e, e,
+							Interval.INFIMUM_EX_INCLUDED | Interval.SUPREMUM_EX_INCLUDED), null);
+					return;
+				} else {
+					node = node.left;
+				}
+			} else {
+				if (node.left == null) {
+					node.right = new TreeNode(null, new Interval<E>(root.middle.comparator(), e, e,
+							Interval.INFIMUM_EX_INCLUDED | Interval.SUPREMUM_EX_INCLUDED), null);
+					return;
+				} else {
+					node = node.left;
+				}
+			}
+		}
+	}
+	
 	private class TreeNode {
 		protected TreeNode left;
 		protected Interval<E> middle;

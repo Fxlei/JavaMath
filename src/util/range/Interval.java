@@ -8,9 +8,11 @@ public class Interval<E> implements Range<E> {
 	private final Comparator<? super E> comparator;
 	private final E infimum;
 	private final E supremum;
-	private final int config;
+	protected final int config;
 	public static final int INFIMUM_INCLUDED = 0b0001;
 	public static final int SUPREMUM_INCLUDED = 0b0010;
+	public static final int INFIMUM_EX_INCLUDED = 0b0101;
+	public static final int SUPREMUM_EX_INCLUDED = 0b1010;
 	public static final int INFIMUM_EXISTS = 0b0100;
 	public static final int SUPREMUM_EXISTS = 0b1000;
 	public static final int EMPTY = 0b10000;
@@ -80,7 +82,7 @@ public class Interval<E> implements Range<E> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private int compare(E e1, E e2) {
+	protected int compare(E e1, E e2) {
 		return e1 == e2 ? 0 : this.comparator == null ? e1 == null
 				? -((Comparable<? super E>) e2).compareTo(e1)
 				: ((Comparable<? super E>) e1).compareTo(e2) : this.comparator.compare(e1, e2);
@@ -126,6 +128,64 @@ public class Interval<E> implements Range<E> {
 		} else {
 			if (this.hasSupremum()) {
 				return this.compare(this.supremum, e) >= (this.isSupremumIncluded() ? 0 : 1);
+			} else {
+				return true;
+			}
+		}
+	}
+	
+	public boolean connected(final E e) {
+		if (this.isEmpty()) {
+			return true;
+		} else if (this.hasInfimum()) {
+			if (this.hasSupremum()) {
+				return this.compare(this.infimum, e) <= 0 && this.compare(this.supremum, e) >= 0;
+			} else {
+				return this.compare(this.infimum, e) <= 0;
+			}
+		} else {
+			if (this.hasSupremum()) {
+				return this.compare(this.supremum, e) >= 0;
+			} else {
+				return true;
+			}
+		}
+	}
+	
+	public boolean connected(final Interval<E> i) {
+		if (this.comparator != i.comparator) {
+			throw new IncompatibleComparatorException();
+		} else if (this.isEmpty() || i.isEmpty()) {
+			return true;
+		} else if (this.hasInfimum()) {// TODO
+			if (this.hasSupremum()) {
+				if (i.hasInfimum()) {
+					if (i.hasSupremum()) {
+						return this.compare(i.infimum, this.supremum) <= (this.isSupremumIncluded()
+								|| i.isInfimumIncluded() ? 0 : -1)
+								|| this.compare(this.infimum, i.supremum) <= (this.isInfimumIncluded()
+										|| i.isSupremumIncluded() ? 0 : -1);
+					} else {
+						return this.compare(i.infimum, this.supremum) <= (this.isSupremumIncluded()
+								|| i.isInfimumIncluded() ? 0 : -1);
+					}
+				} else {
+					return this.compare(this.infimum, i.supremum) <= (this.isInfimumIncluded()
+							|| i.isSupremumIncluded() ? 0 : -1);
+				}
+			} else {
+				if (i.hasSupremum()) {
+					return this.compare(this.infimum, i.supremum) <= (this.isInfimumIncluded()
+							|| i.isSupremumIncluded() ? 0 : -1);
+				} else {
+					return true;
+				}
+			}
+		} else {
+			if (this.hasSupremum() && i.hasInfimum()) {
+				return this.compare(this.supremum, i.infimum) >= (this.isSupremumIncluded() || i.isInfimumIncluded()
+						? 0
+						: 1);
 			} else {
 				return true;
 			}
@@ -216,12 +276,12 @@ public class Interval<E> implements Range<E> {
 	
 	@Override
 	public boolean isLowerBound(final E e) {
-		return this.hasInfimum() ? this.compare(this.infimum, e) >= 0 : false;
+		return this.hasInfimum() ? this.compare(this.infimum, e) >= 0 : this.isEmpty();
 	}
 	
 	@Override
 	public boolean isUpperBound(final E e) {
-		return this.hasSupremum() ? this.compare(this.supremum, e) <= 0 : false;
+		return this.hasSupremum() ? this.compare(this.supremum, e) <= 0 : this.isEmpty();
 	}
 	
 	@Override
@@ -229,7 +289,7 @@ public class Interval<E> implements Range<E> {
 		if (this.hasInfimum()) {
 			return this.compare(this.infimum, e) >= (this.isInfimumIncluded() ? 1 : 0);
 		} else {
-			return false;
+			return this.isEmpty();
 		}
 	}
 	
@@ -238,7 +298,7 @@ public class Interval<E> implements Range<E> {
 		if (this.hasSupremum()) {
 			return this.compare(this.supremum, e) <= (this.isSupremumIncluded() ? -1 : 0);
 		} else {
-			return false;
+			return this.isEmpty();
 		}
 	}
 	
@@ -312,7 +372,7 @@ public class Interval<E> implements Range<E> {
 		}
 	}
 	
-	public static <E> Interval<? extends E> connectedUnion(Interval<E> i1, Interval<? extends E> i2) {
+	public static <E> Interval<E> connectedUnion(Interval<E> i1, Interval<? extends E> i2) {
 		if (i1.comparator != i2.comparator) {
 			throw new IncompatibleComparatorException();
 		} else if (i1.isEmpty()) {
@@ -366,6 +426,22 @@ public class Interval<E> implements Range<E> {
 		}
 	}
 	
+	public static <E> Interval<E> connectedUnion(Interval<E> i1, E e2) {
+		if (i1.isEmpty()) {
+			return new Interval<E>(i1.comparator, e2, e2, INFIMUM_EX_INCLUDED | SUPREMUM_EX_INCLUDED);
+		} else {
+			if (i1.contains(e2)) {
+				return i1;
+			} else if (i1.compare(i1.infimum(), e2) == 0) {
+				return new Interval<E>(i1.comparator, e2, i1.supremum, i1.config | INFIMUM_INCLUDED);
+			} else if (i1.compare(i1.supremum(), e2) == 0) {
+				return new Interval<E>(i1.comparator, i1.infimum, e2, i1.config | SUPREMUM_INCLUDED);
+			} else {
+				throw new IllegalArgumentException("Intervals are not connected.");
+			}
+		}
+	}
+	
 	public boolean isConnected(Interval<? extends E> i) {
 		if (this.comparator != i.comparator) {
 			throw new IncompatibleComparatorException();
@@ -387,7 +463,7 @@ public class Interval<E> implements Range<E> {
 			return true;
 		}
 	}
-
+	
 	@Override
 	public boolean intersects(Range<E> r) {
 		return r.intersects(this);
