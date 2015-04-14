@@ -5,7 +5,7 @@ import java.util.Set;
 
 public interface WritableRange<E> extends Range<E> {
 	default void union(final Range<E> r) {
-		final Iterator<Interval<E>> it = r.toSeparateIntervalSet().getIntervalSet().iterator();
+		final Iterator<Interval<E>> it = r.toSeparateIntervalSet().iterateIntervals();
 		while (it.hasNext()) {
 			union(it.next());
 		}
@@ -23,7 +23,7 @@ public interface WritableRange<E> extends Range<E> {
 	void add(E e);
 	
 	default void remove(final Range<E> r) {
-		final Iterator<Interval<E>> it = r.toSeparateIntervalSet().getIntervalSet().iterator();
+		final Iterator<Interval<E>> it = r.toSeparateIntervalSet().iterateIntervals();
 		while (it.hasNext()) {
 			remove(it.next());
 		}
