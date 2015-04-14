@@ -426,6 +426,22 @@ public class Interval<E> implements Range<E> {
 		}
 	}
 	
+	public static <E> Interval<E> connectedUnion(Interval<E> i1, E e2) {
+		if (i1.isEmpty()) {
+			return new Interval<E>(i1.comparator, e2, e2, INFIMUM_EX_INCLUDED | SUPREMUM_EX_INCLUDED);
+		} else {
+			if (i1.contains(e2)) {
+				return i1;
+			} else if (i1.compare(i1.infimum(), e2) == 0) {
+				return new Interval<E>(i1.comparator, e2, i1.supremum, i1.config | INFIMUM_INCLUDED);
+			} else if (i1.compare(i1.supremum(), e2) == 0) {
+				return new Interval<E>(i1.comparator, i1.infimum, e2, i1.config | SUPREMUM_INCLUDED);
+			} else {
+				throw new IllegalArgumentException("Intervals are not connected.");
+			}
+		}
+	}
+	
 	public boolean isConnected(Interval<? extends E> i) {
 		if (this.comparator != i.comparator) {
 			throw new IncompatibleComparatorException();
