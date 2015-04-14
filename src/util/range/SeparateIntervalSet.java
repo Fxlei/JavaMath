@@ -97,6 +97,84 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		return new TreeIterator();
 	}
 	
+	@Override
+	public boolean hasInfimum() {
+		if (root == null) {
+			return false;
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.hasInfimum();
+		}
+	}
+	
+	@Override
+	public E infimum() {
+		if (root == null) {
+			throw new NoSuchExtremumException("Infimum");
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.infimum();
+		}
+	}
+	
+	@Override
+	public boolean isInfimumIncluded() {
+		if (root == null) {
+			throw new NoSuchExtremumException("Infimum");
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.isInfimumIncluded();
+		}
+	}
+	
+	@Override
+	public boolean hasSupremum() {
+		if (root == null) {
+			return false;
+		} else {
+			TreeNode node = root;
+			while (node.right != null) {
+				node = node.right;
+			}
+			return node.middle.hasSupremum();
+		}
+	}
+	
+	@Override
+	public E supremum() {
+		if (root == null) {
+			throw new NoSuchExtremumException("Supremum");
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.supremum();
+		}
+	}
+	
+	@Override
+	public boolean isSupremumIncluded() {
+		if (root == null) {
+			throw new NoSuchExtremumException("Supremum");
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.isSupremumIncluded();
+		}
+	}
+	
 	private class TreeNode {
 		protected TreeNode left;
 		protected Interval<E> middle;
@@ -123,7 +201,8 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 	}
 	
-	private class TreeIterator implements Iterator<Interval<E>> { // TODO test correctness
+	private class TreeIterator implements Iterator<Interval<E>> { // TODO test
+																	// correctness
 		/**
 		 * path is a list of TreeNodes. It goes from the root to the last node
 		 * that was returned. TreeNodes that are left-parents in the path are
