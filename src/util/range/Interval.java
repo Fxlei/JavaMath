@@ -11,6 +11,8 @@ public class Interval<E> implements Range<E> {
 	private final int config;
 	public static final int INFIMUM_INCLUDED = 0b0001;
 	public static final int SUPREMUM_INCLUDED = 0b0010;
+	public static final int INFIMUM_EX_INCLUDED = 0b0101;
+	public static final int SUPREMUM_EX_INCLUDED = 0b1010;
 	public static final int INFIMUM_EXISTS = 0b0100;
 	public static final int SUPREMUM_EXISTS = 0b1000;
 	public static final int EMPTY = 0b10000;
@@ -80,7 +82,7 @@ public class Interval<E> implements Range<E> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private int compare(E e1, E e2) {
+	protected int compare(E e1, E e2) {
 		return e1 == e2 ? 0 : this.comparator == null ? e1 == null
 				? -((Comparable<? super E>) e2).compareTo(e1)
 				: ((Comparable<? super E>) e1).compareTo(e2) : this.comparator.compare(e1, e2);
@@ -370,7 +372,7 @@ public class Interval<E> implements Range<E> {
 		}
 	}
 	
-	public static <E> Interval<? extends E> connectedUnion(Interval<E> i1, Interval<? extends E> i2) {
+	public static <E> Interval<E> connectedUnion(Interval<E> i1, Interval<? extends E> i2) {
 		if (i1.comparator != i2.comparator) {
 			throw new IncompatibleComparatorException();
 		} else if (i1.isEmpty()) {
