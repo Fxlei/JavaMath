@@ -251,8 +251,6 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		TreeNode node = root;
 		while (node != null) {
 			if (node.middle.connected(e)) {
-				// TODO
-				
 				if (node.middle.compare(node.middle.infimum(), e) == 0) {
 					if (!node.middle.isInfimumIncluded()) {
 						node.middle = new Interval<E>(node.middle.comparator(), e, node.middle.supremum(),
@@ -298,7 +296,6 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 						}
 					}
 				}
-				
 			} else if (node.middle.isLowerBound(e)) {
 				if (node.left == null) {
 					node.left = new TreeNode(null, new Interval<E>(root.middle.comparator(), e, e,
@@ -317,6 +314,11 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void clear() {
+		root = null;
 	}
 	
 	private class TreeNode {
