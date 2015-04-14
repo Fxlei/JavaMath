@@ -8,7 +8,7 @@ public class Interval<E> implements Range<E> {
 	private final Comparator<? super E> comparator;
 	private final E infimum;
 	private final E supremum;
-	private final int config;
+	protected final int config;
 	public static final int INFIMUM_INCLUDED = 0b0001;
 	public static final int SUPREMUM_INCLUDED = 0b0010;
 	public static final int INFIMUM_EX_INCLUDED = 0b0101;
