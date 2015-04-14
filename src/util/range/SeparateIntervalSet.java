@@ -175,6 +175,58 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 	}
 	
+	@Override
+	public boolean isLowerBound(E e) {
+		if (root == null) {
+			return true;
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.isLowerBound(e);
+		}
+	}
+	
+	@Override
+	public boolean isStrictLowerBound(E e) {
+		if (root == null) {
+			return true;
+		} else {
+			TreeNode node = root;
+			while (node.left != null) {
+				node = node.left;
+			}
+			return node.middle.isStrictLowerBound(e);
+		}
+	}
+	
+	@Override
+	public boolean isUpperBound(E e) {
+		if (root == null) {
+			return true;
+		} else {
+			TreeNode node = root;
+			while (node.right != null) {
+				node = node.right;
+			}
+			return node.middle.isUpperBound(e);
+		}
+	}
+	
+	@Override
+	public boolean isStrictUpperBound(E e) {
+		if (root == null) {
+			return true;
+		} else {
+			TreeNode node = root;
+			while (node.right != null) {
+				node = node.right;
+			}
+			return node.middle.isStrictUpperBound(e);
+		}
+	}
+	
 	private class TreeNode {
 		protected TreeNode left;
 		protected Interval<E> middle;
@@ -202,7 +254,6 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	}
 	
 	private class TreeIterator implements Iterator<Interval<E>> { // TODO test
-																	// correctness
 		/**
 		 * path is a list of TreeNodes. It goes from the root to the last node
 		 * that was returned. TreeNodes that are left-parents in the path are
