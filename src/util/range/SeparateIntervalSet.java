@@ -321,6 +321,128 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		root = null;
 	}
 	
+	@Override
+	public void union(Interval<E> i) {
+		TreeNode node = root;
+		if (!i.isEmpty()) {
+			if (root == null) {
+				root = new TreeNode(null, i, null);
+			} else if (i.hasInfimum()) {
+				if (i.hasSupremum()) {
+					//TODO
+					
+					while (node != null) {
+						if (node.middle.intersects(i)) {
+							node.middle = Interval.connectedUnion(node.middle, i);
+							shutInLeft(node, i);
+							shutInRight(node, i);
+							return;
+						} else if(node.middle.isLowerBound(i.supremum())){
+							if (node.left == null) {
+								node.left = new TreeNode(null, i, null);
+								return;
+							} else {
+								node = node.left;
+							}
+						}else{
+							if (node.right == null) {
+								node.right = new TreeNode(null, i, null);
+								return;
+							} else {
+								node = node.right;
+							}
+						}
+					}
+					
+				} else {
+					while (node != null) {
+						if (node.middle.intersects(i)) {
+							node.middle = Interval.connectedUnion(node.middle, i);
+							node.right = null;
+							shutInRight(node, i);
+							return;
+						} else {
+							if (node.right == null) {
+								node.right = new TreeNode(null, i, null);
+								return;
+							} else {
+								node = node.right;
+							}
+						}
+					}
+				}
+			} else if (i.hasSupremum()) {
+				while (node != null) {
+					if (node.middle.intersects(i)) {
+						node.middle = Interval.connectedUnion(node.middle, i);
+						node.left = null;
+						shutInLeft(node, i);
+						return;
+					} else {
+						if (node.left == null) {
+							node.left = new TreeNode(null, i, null);
+							return;
+						} else {
+							node = node.left;
+						}
+					}
+				}
+			} else {
+				root.left = null;
+				root.right = null;
+				root.middle = i;
+			}
+		}
+	}
+	
+	private void shutInLeft(TreeNode node, Interval<E> i) {
+		TreeNode sub = node;
+		while (sub.right != null) {
+			if (sub.right.middle.intersects(i)) {
+				node.middle = new Interval<E>(node.middle.comparator(), null, sub.right.middle.supremum(),
+						sub.right.middle.config & Interval.SUPREMUM_EX_INCLUDED);
+				sub.right = sub.right.right;
+			} else {
+				TreeNode ls = sub.right;
+				while (ls.left != null) {
+					if (ls.left.middle.intersects(i)) {
+						new Interval<E>(node.middle.comparator(), null, ls.left.middle.supremum(),
+								sub.right.middle.config & Interval.SUPREMUM_EX_INCLUDED);
+						sub = ls.left;
+						ls.left = ls.left.right;
+						break;
+					} else {
+						ls = ls.left;
+					}
+				}
+			}
+		}
+	}
+	
+	private void shutInRight(TreeNode node, Interval<E> i) {
+		TreeNode sub = node;
+		while (sub.left != null) {
+			if (sub.left.middle.intersects(i)) {
+				node.middle = new Interval<E>(node.middle.comparator(), sub.left.middle.infimum(), null,
+						sub.left.middle.config & Interval.INFIMUM_EX_INCLUDED);
+				sub.left = sub.left.left;
+			} else {
+				TreeNode ls = sub.left;
+				while (ls.right != null) {
+					if (ls.right.middle.intersects(i)) {
+						new Interval<E>(node.middle.comparator(), ls.right.middle.infimum(), null,
+								sub.left.middle.config & Interval.INFIMUM_EX_INCLUDED);
+						sub = ls.right;
+						ls.right = ls.right.left;
+						break;
+					} else {
+						ls = ls.right;
+					}
+				}
+			}
+		}
+	}
+	
 	private class TreeNode {
 		protected TreeNode left;
 		protected Interval<E> middle;
