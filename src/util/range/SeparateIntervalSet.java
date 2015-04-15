@@ -257,9 +257,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 								node.middle.config | Interval.INFIMUM_EX_INCLUDED);
 						
 						TreeNode nl = node.left;
-						if (nl == null) {
-							// TODO
-						} else {
+						if (nl != null) {
 							if (nl.right == null) {
 								if (nl.middle.connected(e)) {
 									node.right = nl.left;
@@ -281,9 +279,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 								node.middle.config | Interval.SUPREMUM_EX_INCLUDED);
 						
 						TreeNode nr = node.right;
-						if (nr == null) {
-							// TODO
-						} else {
+						if (nr != null) {
 							if (nr.left == null) {
 								if (nr.middle.connected(e)) {
 									node.right = nr.right;
