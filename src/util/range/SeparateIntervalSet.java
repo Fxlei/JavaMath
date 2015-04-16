@@ -36,9 +36,9 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	public boolean contains(E e) {
 		TreeNode node = root;
 		while (node != null) {
-			if (root.middle.contains(e)) {
+			if (root.value.contains(e)) {
 				return true;
-			} else if (node.middle.isLowerBound(e)) {
+			} else if (node.value.isLowerBound(e)) {
 				node = node.left;
 			} else {
 				node = node.right;
@@ -51,9 +51,9 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	public boolean intersects(Interval<E> i) {
 		TreeNode node = root;
 		while (node != null) {
-			if (root.middle.intersects(i)) {
+			if (root.value.intersects(i)) {
 				return true;
-			} else if (node.middle.isLowerBound(i.supremum())) {
+			} else if (node.value.isLowerBound(i.supremum())) {
 				node = node.left;
 			} else {
 				node = node.right;
@@ -106,7 +106,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.hasInfimum();
+			return node.value.hasInfimum();
 		}
 	}
 	
@@ -119,7 +119,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.infimum();
+			return node.value.infimum();
 		}
 	}
 	
@@ -132,7 +132,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.isInfimumIncluded();
+			return node.value.isInfimumIncluded();
 		}
 	}
 	
@@ -145,7 +145,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.right != null) {
 				node = node.right;
 			}
-			return node.middle.hasSupremum();
+			return node.value.hasSupremum();
 		}
 	}
 	
@@ -158,7 +158,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.supremum();
+			return node.value.supremum();
 		}
 	}
 	
@@ -171,7 +171,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.isSupremumIncluded();
+			return node.value.isSupremumIncluded();
 		}
 	}
 	
@@ -184,7 +184,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.isLowerBound(e);
+			return node.value.isLowerBound(e);
 		}
 	}
 	
@@ -197,7 +197,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.left != null) {
 				node = node.left;
 			}
-			return node.middle.isStrictLowerBound(e);
+			return node.value.isStrictLowerBound(e);
 		}
 	}
 	
@@ -210,7 +210,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.right != null) {
 				node = node.right;
 			}
-			return node.middle.isUpperBound(e);
+			return node.value.isUpperBound(e);
 		}
 	}
 	
@@ -223,7 +223,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			while (node.right != null) {
 				node = node.right;
 			}
-			return node.middle.isStrictUpperBound(e);
+			return node.value.isStrictUpperBound(e);
 		}
 	}
 	
@@ -250,55 +250,55 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	public void add(E e) {
 		TreeNode node = root;
 		while (node != null) {
-			if (node.middle.connected(e)) {
-				if (node.middle.compare(node.middle.infimum(), e) == 0) {
-					if (!node.middle.isInfimumIncluded()) {
-						node.middle = new Interval<E>(node.middle.comparator(), e, node.middle.supremum(),
-								node.middle.config | Interval.INFIMUM_EX_INCLUDED);
+			if (node.value.connected(e)) {
+				if (node.value.compare(node.value.infimum(), e) == 0) {
+					if (!node.value.isInfimumIncluded()) {
+						node.value = new Interval<E>(node.value.comparator(), e, node.value.supremum(),
+								node.value.config | Interval.INFIMUM_EX_INCLUDED);
 						
 						TreeNode nl = node.left;
 						if (nl != null) {
 							if (nl.right == null) {
-								if (nl.middle.connected(e)) {
+								if (nl.value.connected(e)) {
 									node.right = nl.left;
 								}
 							} else {
 								while (nl.right.right != null) {
 									nl = nl.left;
 								}
-								if (nl.right.middle.connected(e)) {
-									node.middle = Interval.connectedUnion(node.middle, nl.right.middle);
+								if (nl.right.value.connected(e)) {
+									node.value = Interval.connectedUnion(node.value, nl.right.value);
 									nl.right = nl.right.left;
 								}
 							}
 						}
 					}
-				} else if (node.middle.compare(node.middle.supremum(), e) == 0) {
-					if (!node.middle.isSupremumIncluded()) {
-						node.middle = new Interval<E>(node.middle.comparator(), node.middle.infimum(), e,
-								node.middle.config | Interval.SUPREMUM_EX_INCLUDED);
+				} else if (node.value.compare(node.value.supremum(), e) == 0) {
+					if (!node.value.isSupremumIncluded()) {
+						node.value = new Interval<E>(node.value.comparator(), node.value.infimum(), e,
+								node.value.config | Interval.SUPREMUM_EX_INCLUDED);
 						
 						TreeNode nr = node.right;
 						if (nr != null) {
 							if (nr.left == null) {
-								if (nr.middle.connected(e)) {
+								if (nr.value.connected(e)) {
 									node.right = nr.right;
 								}
 							} else {
 								while (nr.left.left != null) {
 									nr = nr.left;
 								}
-								if (nr.left.middle.connected(e)) {
-									node.middle = Interval.connectedUnion(node.middle, nr.left.middle);
+								if (nr.left.value.connected(e)) {
+									node.value = Interval.connectedUnion(node.value, nr.left.value);
 									nr.left = nr.left.right;
 								}
 							}
 						}
 					}
 				}
-			} else if (node.middle.isLowerBound(e)) {
+			} else if (node.value.isLowerBound(e)) {
 				if (node.left == null) {
-					node.left = new TreeNode(null, new Interval<E>(root.middle.comparator(), e, e,
+					node.left = new TreeNode(null, new Interval<E>(root.value.comparator(), e, e,
 							Interval.INFIMUM_EX_INCLUDED | Interval.SUPREMUM_EX_INCLUDED), null);
 					return;
 				} else {
@@ -306,7 +306,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				}
 			} else {
 				if (node.left == null) {
-					node.right = new TreeNode(null, new Interval<E>(root.middle.comparator(), e, e,
+					node.right = new TreeNode(null, new Interval<E>(root.value.comparator(), e, e,
 							Interval.INFIMUM_EX_INCLUDED | Interval.SUPREMUM_EX_INCLUDED), null);
 					return;
 				} else {
@@ -314,6 +314,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				}
 			}
 		}
+		// Does not work if root == null / empty.
 	}
 	
 	@Override
@@ -329,22 +330,20 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				root = new TreeNode(null, i, null);
 			} else if (i.hasInfimum()) {
 				if (i.hasSupremum()) {
-					//TODO
-					
 					while (node != null) {
-						if (node.middle.intersects(i)) {
-							node.middle = Interval.connectedUnion(node.middle, i);
+						if (node.value.intersects(i)) {
+							node.value = Interval.connectedUnion(node.value, i);
 							shutInLeft(node, i);
 							shutInRight(node, i);
 							return;
-						} else if(node.middle.isLowerBound(i.supremum())){
+						} else if (node.value.isLowerBound(i.supremum())) {
 							if (node.left == null) {
 								node.left = new TreeNode(null, i, null);
 								return;
 							} else {
 								node = node.left;
 							}
-						}else{
+						} else {
 							if (node.right == null) {
 								node.right = new TreeNode(null, i, null);
 								return;
@@ -353,11 +352,10 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 							}
 						}
 					}
-					
 				} else {
 					while (node != null) {
-						if (node.middle.intersects(i)) {
-							node.middle = Interval.connectedUnion(node.middle, i);
+						if (node.value.intersects(i)) {
+							node.value = Interval.connectedUnion(node.value, i);
 							node.right = null;
 							shutInRight(node, i);
 							return;
@@ -373,8 +371,8 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				}
 			} else if (i.hasSupremum()) {
 				while (node != null) {
-					if (node.middle.intersects(i)) {
-						node.middle = Interval.connectedUnion(node.middle, i);
+					if (node.value.intersects(i)) {
+						node.value = Interval.connectedUnion(node.value, i);
 						node.left = null;
 						shutInLeft(node, i);
 						return;
@@ -390,7 +388,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 			} else {
 				root.left = null;
 				root.right = null;
-				root.middle = i;
+				root.value = i;
 			}
 		}
 	}
@@ -398,16 +396,16 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	private void shutInLeft(TreeNode node, Interval<E> i) {
 		TreeNode sub = node;
 		while (sub.right != null) {
-			if (sub.right.middle.intersects(i)) {
-				node.middle = new Interval<E>(node.middle.comparator(), null, sub.right.middle.supremum(),
-						sub.right.middle.config & Interval.SUPREMUM_EX_INCLUDED);
+			if (sub.right.value.intersects(i)) {
+				node.value = new Interval<E>(node.value.comparator(), null, sub.right.value.supremum(),
+						sub.right.value.config & Interval.SUPREMUM_EX_INCLUDED);
 				sub.right = sub.right.right;
 			} else {
 				TreeNode ls = sub.right;
 				while (ls.left != null) {
-					if (ls.left.middle.intersects(i)) {
-						new Interval<E>(node.middle.comparator(), null, ls.left.middle.supremum(),
-								sub.right.middle.config & Interval.SUPREMUM_EX_INCLUDED);
+					if (ls.left.value.intersects(i)) {
+						new Interval<E>(node.value.comparator(), null, ls.left.value.supremum(), sub.right.value.config
+								& Interval.SUPREMUM_EX_INCLUDED);
 						sub = ls.left;
 						ls.left = ls.left.right;
 						break;
@@ -422,16 +420,16 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 	private void shutInRight(TreeNode node, Interval<E> i) {
 		TreeNode sub = node;
 		while (sub.left != null) {
-			if (sub.left.middle.intersects(i)) {
-				node.middle = new Interval<E>(node.middle.comparator(), sub.left.middle.infimum(), null,
-						sub.left.middle.config & Interval.INFIMUM_EX_INCLUDED);
+			if (sub.left.value.intersects(i)) {
+				node.value = new Interval<E>(node.value.comparator(), sub.left.value.infimum(), null,
+						sub.left.value.config & Interval.INFIMUM_EX_INCLUDED);
 				sub.left = sub.left.left;
 			} else {
 				TreeNode ls = sub.left;
 				while (ls.right != null) {
-					if (ls.right.middle.intersects(i)) {
-						new Interval<E>(node.middle.comparator(), ls.right.middle.infimum(), null,
-								sub.left.middle.config & Interval.INFIMUM_EX_INCLUDED);
+					if (ls.right.value.intersects(i)) {
+						new Interval<E>(node.value.comparator(), ls.right.value.infimum(), null, sub.left.value.config
+								& Interval.INFIMUM_EX_INCLUDED);
 						sub = ls.right;
 						ls.right = ls.right.left;
 						break;
@@ -443,19 +441,225 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 	}
 	
+	@Override
+	public void remove(E e) {
+		if (root.value.hasSupremum() || root.value.hasInfimum()) {
+			TreeNode node = root;
+			while (node != null) {
+				if (node.value.contains(e)) {
+					if (node.value.isLowerBound(e)) {
+						node.value = new Interval<E>(node.value.comparator(), e, node.value.supremum(),
+								node.value.config & ~Interval.INFIMUM_INCLUDED);
+					} else if (node.value.isUpperBound(e)) {
+						node.value = new Interval<E>(node.value.comparator(), node.value.infimum(), e,
+								node.value.config & ~Interval.SUPREMUM_INCLUDED);
+					} else {
+						if (node.left == null) {
+							node.left = new TreeNode(null, new Interval<E>(node.value.comparator(),
+									node.value.hasInfimum() ? node.value.infimum() : null, e, node.value.config
+											& ~Interval.SUPREMUM_INCLUDED), null);
+							node.value = new Interval<E>(node.value.comparator(), e, node.value.hasSupremum()
+									? node.value.supremum()
+									: null, node.value.config & ~Interval.INFIMUM_INCLUDED);
+						} else if (node.right == null) {
+							node.right = new TreeNode(null, new Interval<E>(node.value.comparator(), e,
+									node.value.hasSupremum() ? node.value.supremum() : null, node.value.config
+											& ~Interval.INFIMUM_INCLUDED), null);
+							node.value = new Interval<E>(node.value.comparator(), node.value.hasInfimum()
+									? node.value.infimum()
+									: null, e, node.value.config & ~Interval.SUPREMUM_INCLUDED);
+						} else {
+							TreeNode n = node.right;
+							while (n.left != null) {
+								n = n.left;
+							}
+							n.left = new TreeNode(null, new Interval<E>(node.value.comparator(), e,
+									node.value.hasSupremum() ? node.value.supremum() : null, node.value.config
+											& ~Interval.INFIMUM_INCLUDED), null);
+							node.value = new Interval<E>(node.value.comparator(), node.value.hasInfimum()
+									? node.value.infimum()
+									: null, e, node.value.config & ~Interval.SUPREMUM_INCLUDED);
+						}
+					}
+				} else if (node.value.isLowerBound(e)) {
+					node = node.left;
+				} else {
+					node = node.right;
+				}
+			}
+		} else {
+			root.value = new Interval<E>(root.value.comparator(), null, e, Interval.SUPREMUM_EXISTS);
+			root.right = new TreeNode(null, new Interval<E>(root.value.comparator(), e, null, Interval.INFIMUM_EXISTS),
+					null);
+		}
+	}
+	
+	@Override
+	public void remove(Interval<E> i) {
+		if (root != null && !i.isEmpty()) {
+			if (i.hasInfimum()) {
+				if (i.hasSupremum()) {
+					
+					// TODO
+					
+				} else {
+					TreeNode node = root;
+					TreeNode parent = null;
+					while (node != null && node.value.intersects(i)) {
+						parent = node;
+						node = node.right;
+					}
+					if (node != null) {
+						if (isGlobalyLower(i, node.value)) {
+							shutOutLeft(node, i);
+						} else {
+							node.value = nonEmptyUpperRemove(i, node.value);
+							node.right = null;
+						}
+						if (parent == null) {
+							root = node.left;
+						} else {
+							parent.left = node.left;
+						}
+					}
+				}
+			} else if (i.hasSupremum()) {
+				TreeNode node = root;
+				TreeNode parent = null;
+				while (node != null && node.value.intersects(i)) {
+					parent = node;
+					node = node.left;
+				}
+				if (node != null) {
+					if (isGlobalyHigher(i, node.value)) {
+						shutOutRight(node, i);
+					} else {
+						node.value = nonEmptyLowerRemove(i, node.value);
+						node.left = null;
+					}
+					if (parent == null) {
+						root = node.right;
+					} else {
+						parent.left = node.right;
+					}
+				}
+			} else {
+				root = null;
+			}
+		}
+	}
+	
+	private boolean isGlobalyLower(Interval<E> i, Interval<E> than) {
+		return i.isInfimumIncluded() || !than.isInfimumIncluded() ? than.isLowerBound(i.infimum()) : than
+				.isStrictLowerBound(i.infimum());
+	}
+	
+	private boolean isGlobalyHigher(Interval<E> i, Interval<E> than) {
+		return i.isSupremumIncluded() || !than.isSupremumIncluded() ? than.isUpperBound(i.supremum()) : than
+				.isStrictUpperBound(i.supremum());
+	}
+	
+	private Interval<E> nonEmptyLowerRemove(Interval<E> i, Interval<E> from) {
+		return new Interval<E>(from.comparator(), i.supremum(), from.supremum(),
+				(Interval.INFIMUM_INCLUDED & (~i.config >> 1)) | Interval.INFIMUM_EXISTS
+						| (from.config & Interval.SUPREMUM_EX_INCLUDED));
+	}
+	
+	private Interval<E> nonEmptyUpperRemove(Interval<E> i, Interval<E> from) {
+		return new Interval<E>(from.comparator(), from.infimum(), i.infimum(),
+				(Interval.SUPREMUM_INCLUDED & (~i.config << 1)) | Interval.SUPREMUM_EXISTS
+						| (from.config & Interval.INFIMUM_EX_INCLUDED));
+	}
+	
+	/**
+	 * Removes any Intervals to the left of node, that are contained i and
+	 * removes i from any Interval intersecting i. Asserts that node itself
+	 * intersects i.
+	 * 
+	 * @param node
+	 *            A node intersecting i.
+	 * @param i
+	 *            An {@link Interval} to remove.
+	 */
+	private void shutOutLeft(TreeNode node, Interval<E> i) {
+		while (node.left != null && node.left.value.intersects(i)) {
+			if (isGlobalyLower(i, node.left.value)) {
+				node.left = node.left.left;
+			} else {
+				node.left.right = null;
+				node.left.value = nonEmptyUpperRemove(i, node.left.value);
+				return;
+			}
+		}
+		if (node.left != null) {
+			node = node.left;
+			while (node.right != null) {
+				if (node.right.value.intersects(i)) {
+					if (isGlobalyLower(i, node.right.value)) {
+						node.right = node.right.left;
+					} else {
+						node.right.right = null;
+						node.right.value = nonEmptyUpperRemove(i, node.right.value);
+						return;
+					}
+				} else {
+					node = node.right;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Removes any Intervals to the right of node, that are contained i and
+	 * removes i from any Interval intersecting i. Asserts that node itself
+	 * intersects i.
+	 * 
+	 * @param node
+	 *            A node intersecting i.
+	 * @param i
+	 *            An {@link Interval} to remove.
+	 */
+	private void shutOutRight(TreeNode node, Interval<E> i) {
+		while (node.right != null && node.right.value.intersects(i)) {
+			if (isGlobalyHigher(i, node.right.value)) {
+				node.right = node.right.right;
+			} else {
+				node.right.left = null;
+				node.right.value = nonEmptyLowerRemove(i, node.right.value);
+				return;
+			}
+		}
+		if (node.right != null) {
+			node = node.right;
+			while (node.left != null) {
+				if (node.left.value.intersects(i)) {
+					if (isGlobalyHigher(i, node.left.value)) {
+						node.left = node.left.right;
+					} else {
+						node.left.left = null;
+						node.left.value = nonEmptyLowerRemove(i, node.left.value);
+						return;
+					}
+				} else {
+					node = node.left;
+				}
+			}
+		}
+	}
+	
 	private class TreeNode {
 		protected TreeNode left;
-		protected Interval<E> middle;
+		protected Interval<E> value;
 		protected TreeNode right;
 		
 		public TreeNode(TreeNode left, Interval<E> middle, TreeNode right) {
 			this.left = left;
-			this.middle = middle;
+			this.value = middle;
 			this.right = right;
 		}
 		
 		public void addToSet(Set<E> set) {
-			set.addAll(middle.toSet());
+			set.addAll(value.toSet());
 			if (left != null) {
 				left.addToSet(set);
 			}
@@ -465,7 +669,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		}
 		
 		public boolean isSet() {
-			return middle.isSet() && (left == null || left.isSet()) && (right == null || right.isSet());
+			return value.isSet() && (left == null || left.isSet()) && (right == null || right.isSet());
 		}
 	}
 	
@@ -511,11 +715,11 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 				TreeNode node = path.peek();
 				if (node == null) {
 					path.pop();
-					return path.peek().middle;
+					return path.peek().value;
 				} else {
 					if (node.right == null) {
 						path.pop();
-						return path.peek().middle;
+						return path.peek().value;
 					} else {
 						node = node.right;
 						path.pop();
@@ -524,7 +728,7 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 							node = node.left;
 							path.push(node);
 						}
-						return node.middle;
+						return node.value;
 					}
 				}
 			}
