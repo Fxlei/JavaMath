@@ -499,9 +499,46 @@ public class SeparateIntervalSet<E> implements WritableRange<E> {
 		if (root != null && !i.isEmpty()) {
 			if (i.hasInfimum()) {
 				if (i.hasSupremum()) {
-					
-					// TODO
-					
+					TreeNode node = root;
+					TreeNode parent = null;
+					while (node != null && node.value.intersects(i)) {
+						parent = node;
+						if (node.value.isLowerBound(i.supremum())) {
+							node = node.left;
+						} else {
+							node = node.right;
+						}
+					}
+					if (node != null) {
+						if (isGlobalyLower(i, node.value)) {
+							shutOutLeft(node, i);
+							if (isGlobalyHigher(i, node.value)) {
+								shutOutRight(node, i);
+								TreeNode nc = node.left;
+								while(nc.right!=null){
+									nc = nc.right;
+								}
+								nc.right = node.right;
+								if (parent == null) {
+									root = node.left;
+								} else if(parent.left == node){
+									parent.left = node.left;
+								}else{
+									parent.right = node.left;
+								}
+							} else {
+								node.value = nonEmptyLowerRemove(i, node.value);
+							}
+						} else {
+							if (isGlobalyHigher(i, node.value)) {
+								shutOutRight(node, i);
+							} else {
+								node.right = new TreeNode(null, nonEmptyLowerRemove(i, node.value), node.right);
+							}
+							node.value = nonEmptyUpperRemove(i, node.value);
+						}
+						
+					}
 				} else {
 					TreeNode node = root;
 					TreeNode parent = null;
